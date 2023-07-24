@@ -1,0 +1,73 @@
+body {
+    font-family: 'Comfortaa';
+    background-color: #f2f2f2;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+}
+
+.container {
+    background-color: #ffffff;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 7px 20px #ccc;
+    width: 80%;
+    max-width: 400px;
+}
+
+input[type=text],
+input[type=password] {
+    width: 100%;
+    padding: 20px;
+    margin: 8px 0;
+    box-sizing: border-box;
+    border: 2px solid #aaa;
+    border-radius: 4px;
+    font-size: 16px;
+    outline: none;
+    transition: border-color 0.2s ease;
+}
+
+input[type=password] {
+    padding-right: 60px;
+}
+
+input[type=text]:focus,
+input[type=password]:focus {
+    border-color: #4CAF50;
+}
+
+input[type=submit] {
+    background-color: #4CAF50;
+    color: white;
+    padding: 20px;
+    margin: 10px 0;
+    width: 100%;
+    border: none;
+    border-radius: 35px;
+    cursor: pointer;
+    font-size: 16px;
+    outline: none;
+    transition: background-color 0.2s ease;
+}
+
+input[type=submit]:hover {
+    background-color: #45a049;
+}
+
+::placeholder {
+    color: #aaa;
+    opacity: 1;
+}
+
+/* Show/hide icon styles */
+.password-icon {
+    position: relative;
+    top: -51px;
+    right: -42%;
+    cursor: pointer;
+    font-size: 18px;
+}

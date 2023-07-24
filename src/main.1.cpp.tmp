@@ -1,0 +1,159 @@
+#include <Wire.h>
+#include <SPI.h>
+
+#include <WiFi.h>
+#include <DNSServer.h>
+#include <AsyncTCP.h>
+#include <ESPAsyncWebServer.h>
+#include <SPIFFS.h>
+#include "esp_wifi.h"
+
+const byte DNS_PORT = 53;
+IPAddress apIP(8, 8, 4, 4); // The default Android DNS
+DNSServer dnsServer;
+AsyncWebServer server(80);
+
+bool wifiConnected = false;
+
+void handleFormSubmit(AsyncWebServerRequest *request)
+{
+  if (request->hasArg("SSID") && request->hasArg("password"))
+  {
+    String ssidValue = request->arg("SSID");
+    String passwordValue = request->arg("password");
+
+    // Connect to WiFi using the captured SSID and password
+    Serial.println("Connecting to WiFi...");
+    WiFi.begin(ssidValue.c_str(), passwordValue.c_str());
+
+    // Wait for the connection to be established
+    while (WiFi.status() != WL_CONNECTED)
+    {
+      delay(500);
+      Serial.print(".");
+    }
+
+    // Print connection details
+    Serial.println();
+    Serial.println("WiFi connected!");
+    Serial.print("SSID: ");
+    Serial.println(WiFi.SSID());
+    Serial.print("IP address: ");
+    Serial.println(WiFi.localIP());
+
+    // Get the connected clients' details
+    int numberOfClients = WiFi.softAPgetStationNum();
+    Serial.println("Number of connected clients: " + String(numberOfClients));
+    for (int i = 0; i < numberOfClients; i++)
+    {
+      wifi_sta_list_t stationList;
+      esp_wifi_ap_get_sta_list(&stationList);
+      String macAddress = "";
+      for (int j = 0; j < 6; j++)
+      {
+        macAddress += String(stationList.sta[i].mac[j], HEX);
+        if (j < 5)
+          macAddress += ":";
+      }
+      Serial.print("Client " + String(i + 1) + " - MAC Address: ");
+      Serial.print(macAddress);
+    }
+
+    wifiConnected = true; // Set the flag to true after successful WiFi connection
+
+    request->send(200); // Respond with 200 OK
+  }
+  else
+  {
+    request->send(400, "text/plain", "Bad Request");
+  }
+}
+
+String getContentType(String filename)
+{
+  if (filename.endsWith(".html"))
+    return "text/html";
+  if (filename.endsWith(".css"))
+    return "text/css";
+  if (filename.endsWith(".js"))
+    return "application/javascript";
+  if (filename.endsWith(".png"))
+    return "image/png";
+  if (filename.endsWith(".gif"))
+    return "image/gif";
+  if (filename.endsWith(".jpg"))
+    return "image/jpeg";
+  if (filename.endsWith(".ico"))
+    return "image/x-icon";
+  if (filename.endsWith(".xml"))
+    return "text/xml";
+  if (filename.endsWith(".pdf"))
+    return "application/x-pdf";
+  if (filename.endsWith(".zip"))
+    return "application/x-zip";
+  if (filename.endsWith(".gz"))
+    return "application/x-gzip";
+  return "text/plain";
+}
+
+void setup()
+{
+  Serial.begin(9600);
+
+  WiFi.mode(WIFI_AP);
+  WiFi.softAP("ESP32-DNSServer");
+  WiFi.softAPConfig(apIP, apIP, IPAddress(255, 255, 255, 0));
+
+  // if DNSServer is started with "*" for domain name, it will reply with
+  // provided IP to all DNS request
+  dnsServer.start(DNS_PORT, "*", apIP);
+
+  SPIFFS.begin();
+
+  server.on("/connect", HTTP_POST, handleFormSubmit);
+
+  std::vector<String> fileList;
+  File root = SPIFFS.open("/");
+  File file = root.openNextFile();
+  while (file)
+  {
+    if (!file.isDirectory())
+      fileList.push_back(file.path());
+
+    Serial.println(file.path());
+    file = root.openNextFile();
+  }
+
+  // Set up static routes for all files in the list
+  for (const String &filePath : fileList)
+  {
+    const char *path = filePath.c_str();
+    String contentType = getContentType(filePath);
+  
+    if (filePath == "/index.html")
+      path = "/";
+   
+    server.on(path, HTTP_GET, [filePath](AsyncWebServerRequest *request)
+    {
+      String contentType = getContentType(filePath);
+      AsyncWebServerResponse *response = request->beginResponse(SPIFFS, filePath, contentType);
+      request->send(response);
+      Serial.println(filePath); 
+    });
+  }
+
+  server.onNotFound([](AsyncWebServerRequest *request)
+  { 
+    request->redirect("/setup/wificonnect.html"); 
+  });
+  server.begin();
+}
+
+bool captivePageShown = false;
+void loop()
+{
+  dnsServer.processNextRequest();
+  // Other loop tasks, if any
+
+
+}

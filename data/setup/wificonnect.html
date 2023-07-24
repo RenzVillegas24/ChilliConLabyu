@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta charset="utf-8">
+    <title>Connect to WiFi</title>
+    <link rel="stylesheet" href="../src/styles/style.css">
+    <link rel="stylesheet" href="../src/fonts/fonts.css">
+</head>
+<body>
+    <div class="container">
+    <h1>Connect to WiFi</h1>
+    <form method="post" action="/setup/wificonnect.html" method="POST">
+        <input type="text" name="SSID" placeholder="Enter Network ID" required><br>
+        <input type="password" name="password" placeholder="Enter Password" id="password-input" required>
+        <svg class="password-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"
+            onclick="togglePasswordVisibility()">
+            <path d="" fill="#aaa" />
+        </svg>
+        <input type="submit" value="Connect">
+    </form>
+</div>
+   <script>
+    var showPass = "M1.5 12c0-2.3 3.8-7.5 10.5-7.5S22.5 9.8 22.5 12s-3.8 7.5-10.5 7.5S1.5 14.2 1.5 12zM12 16.8a4.8 4.8 0 1 0 0-9.6 4.8 4.8 0 0 0 0 9.6zm2.7-4.8a2.7 2.7 0 1 1-5.4 0 2.7 2.7 0 0 1 5.4 0z"
+    var hidePass = "M20.7 20.7a1 1 0 0 0 0-1.4l-16-16a1 1 0 0 0-1.4 1.4l2 2c-2.5 1.6-3.8 4-3.8 5.3 0 2.3 3.8 7.5 10.5 7.5 2 0 3.6-.4 5-1l2.3 2.2a1 1 0 0 0 1.4 0zM14.6 16 13 14.5a2.7 2.7 0 0 1-3.6-3.6L8 9.4a4.8 4.8 0 0 0 6.6 6.6zm7.9-4c0 1-.7 2.6-2.2 4l-3.6-3.5a4.8 4.8 0 0 0-5.2-5.2L9.1 4.8c.9-.2 1.9-.3 2.9-.3 6.8 0 10.5 5.3 10.5 7.5z"
+    var icon = document.querySelector(".password-icon");
+    icon.querySelector("path").setAttribute("d", showPass);
+    function togglePasswordVisibility() {
+        const passwordInput = document.getElementById('password-input');
+        if (passwordInput.type === "password") {
+            passwordInput.type = "text";
+            icon.querySelector("path").setAttribute("d", hidePass);
+        } else {
+            passwordInput.type = "password";
+            icon.querySelector("path").setAttribute("d", showPass);
+        }
+    }
+</script>
+</body>
+</html>
