@@ -10,9 +10,50 @@
 <body>
     <div class="container">
         <h1>ChiliConLabyu Home Page</h1>
-        Testing
+        <h1>Moisture Sensor Readout</h1>
+        <p id="moistureValue">Loading...</p>
+
+        <label for="intervalInput">Interval (in milliseconds):</label>
+        <input type="" id="intervalInput" min="1000" step="100" value="5000">
+        <button onclick="updateInterval()">Apply Interval</button>
+
+
+        <label for="updateInterval">Update Interval (ms):</label>
+        <input type="range" id="updateInterval" min="1000" max="10000" step="1000" value="5000">
+
     </div>
     <script>
+        const moistureValueElement = document.getElementById('moistureValue');
+
+        function fetchData() {
+            fetch('/data')
+                .then(response => response.text())
+                .then(data => {
+                    moistureValueElement.textContent = data;
+                })
+                .catch(error => {
+                    moistureValueElement.textContent = 'Error fetching data';
+                    console.error(error);
+                });
+        }
+
+    
+        function updateInterval() {
+            const newInterval = parseInt(intervalInput.value, 10);
+            if (newInterval >= 1000) {
+                clearInterval(intervalId);
+                intervalId = setInterval(fetchData, newInterval);
+            } else {
+                alert('Interval must be at least 1000 milliseconds (1 second).');
+            }
+        }
+
+
+        // Fetch data every 5 seconds (default interval)
+        intervalId = setInterval(fetchData, 5000);
+
+        // Fetch data immediately on page load
+        fetchData();
     </script>
 </body>
 </html>
